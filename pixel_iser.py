@@ -133,16 +133,17 @@ def draw_circle(im,centre,size,colour):
     return(im)
 
 
-def similairity(im1,im2 = image):
-    im1 = im1*255 #the new image is in 0-1 RGB while the original is 0-255
+def similairity(im1,im2 = image,scale = True):
+    if scale == True:
+        im1 = im1*255 #the new image is in 0-1 RGB while the original is 0-255
     "a crude function to calculate the difference between two images"
     diff = np.subtract(im1,im2)
     return(np.abs(np.mean(diff)))
 
 
 init = similairity(im)
-goal = similairity(image)
-
+goal = similairity(image,scale = False)
+print(init, goal)
 a = 0
 A = [0]
 S = [0]
@@ -168,7 +169,7 @@ def animate_rand(i,im,height,width,size,init,f = 20):
         im = draw_square(im,(x,y),size,colour = c)
 
         #calculate similarity
-        s = 1 - similairity(im)/init ##not convinced this is accurate but it's hardly important
+        s = 100*(1-similairity(im)/255) ##not convinced this is accurate but it's hardly important
         a = A[-1]
         a += 1
         A.append(a)
@@ -179,7 +180,9 @@ def animate_rand(i,im,height,width,size,init,f = 20):
         ax1.imshow(im)
         
         ax3.clear()
-        ax3.set_title("{0:.4f}% similair".format(s))
+        ax3.set_xlabel(f'iteration {i}')
+        ax3.set_ylabel(f'max accuracy {max(S):.2f}%')
+        ax3.set_title(f'{s:.2f}% similair')
         ax3.plot(S)
 
 ax1.set_title("new")
@@ -187,7 +190,7 @@ ax2.set_title("original")
 fig.tight_layout()
 ani = animation.FuncAnimation(fig,animate_rand,interval = 1,fargs = (im,height,
                                                                      width,size,init,
-                                                                     40))
+                                                                     35))
 plt.show()
 
 #save the image
