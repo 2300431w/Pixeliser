@@ -36,6 +36,7 @@ width = image.shape[1]
 im2 = np.zeros([height,width,3])
 
 if image.shape[2] == 4:
+    print("Image uses RGBA")
     #takes into account the possibility that it uses [rgba] not [rgb]
     #and crudley removes the a value. Could definitley be improved
     for h in np.arange(height):
@@ -60,8 +61,9 @@ assert im.shape == image.shape
 
 #init figure
 fig = plt.figure()
-ax1 = fig.add_subplot(121) #pixel image
-ax2 = fig.add_subplot(122) #original
+ax1 = fig.add_subplot(131) #pixel image
+ax2 = fig.add_subplot(132) #original
+ax3 = fig.add_subplot(133) #Similarity tracker
 ax2.imshow(image)
 
 
@@ -132,9 +134,10 @@ def draw_circle(im,centre,size,colour):
 
 
 def similairity(im1,im2 = image):
+    im1 = im1*255 #the new image is in 0-1 RGB while the original is 0-255
     "a crude function to calculate the difference between two images"
-    diff = im1 - im2
-    return(np.abs(np.sum(diff)))
+    diff = np.subtract(im1,im2)
+    return(np.abs(np.mean(diff)))
 
 
 init = similairity(im)
@@ -144,14 +147,14 @@ a = 0
 A = [0]
 S = [0]
 
-def animate_rand(i,im,height,width,size,init):
-    if size - i > height/100:
+def animate_rand(i,im,height,width,size,init,f = 20):
+    if size - i > height//f:
         
         size -= i
         #as i increases (more iterations) the shapes become smaller
     else:
-        return()
-        #size = height/100 #replace "return" with this to make it run indefinitley
+        #return()
+        size = height//f #replace "return" with this to make it run indefinitley
     
     for x in np.arange(1):
 
@@ -172,10 +175,19 @@ def animate_rand(i,im,height,width,size,init):
         S.append(s)
         
         ax1.clear()#to stop overlapping plots and causing unnecessary render issues
-        ax1.set_title("{0:.4f}% similair".format(s))
+        
         ax1.imshow(im)
         
-ani = animation.FuncAnimation(fig,animate_rand,interval = 100,fargs = (im,height,width,size,init))
+        ax3.clear()
+        ax3.set_title("{0:.4f}% similair".format(s))
+        ax3.plot(S)
+
+ax1.set_title("new")
+ax2.set_title("original")
+fig.tight_layout()
+ani = animation.FuncAnimation(fig,animate_rand,interval = 1,fargs = (im,height,
+                                                                     width,size,init,
+                                                                     40))
 plt.show()
 
 #save the image
